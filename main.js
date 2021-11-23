@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const {Intents} = require("discord.js");
+const _ = require("lodash");
 
 const client = new Discord.Client({ intents: [
 		Intents.FLAGS.GUILDS,
@@ -8,27 +9,32 @@ const client = new Discord.Client({ intents: [
 	]
 });
 
-const prefix = '-';
+const prefix = '--';
 
 client.once('ready', () => {
 	console.log('TeamSplitterBOT is ready!');
 })
 
-let usersNick = [];
-function getArrUserNick(members) {
-	let usersNick = [];
+function getName(member) {
+	const nickName = member.nickname;
+	const userName = member.user.username;
 
-	for (let [memberId, member] of members) {
-		const nick = member.nickname;
-		const username = member.user.username;
-		if (nick === null) {
-			usersNick.push(username);
-		} else {
-			usersNick.push(nick);
-		}
+	if (nickName === null) {
+		return userName;
 	}
 
-	return usersNick;
+	return nickName;
+};
+
+// let usersNick = [];
+function getNames(members) {
+	let names = [];
+
+	for (let [memberId, member] of members) {
+		names.push(getName(member));
+	}
+
+	return names;
 }
 
 messageCreateFunction = function(message) {
@@ -36,77 +42,72 @@ messageCreateFunction = function(message) {
 		return;
 	}
 
+	const member = message.member;
+	const memberId = member.id;
+
+	const channel = member.voice.channel;
+	const name = getName(member);
+
 	const args = message.content.slice(prefix.length).split(/ +/);
 	const command = args.shift().toLowerCase();
 
-	if (command === 'ping') {
-		message.channel.send('pong!');
-	} else if (command === 'keyboard') {
-		message.channel.send('Logitech something is my keyboard, yooo!');
-	} else if (command === 'general') {
-		const member = message.member;
-		const memberId = member.id;
+	switch (command) {
+		case 'help':
+			message.channel.send('Available commands: ping, keyboard, 5v5');
+			break;
+		case'ping':
+			message.channel.send('pong!');
+			break;
+		case'keyboard':
+			message.channel.send('Logitech something is my keyboard, yes!');
+			break;
+		case '5v5':
+			console.log('channel: '+channel);
+			console.log('name: '+name);
 
-		const getName = function(member) {
-			const nickName = member.nickname;
-			const userName = member.user.username;
-
-			if (nickName === null) {
-				return userName;
+			if (channel === null) {
+				message.channel.send(`${member.user}`+', you are not in a voice channel! Join a voice channel first.');
+				return;
 			}
 
-			return nickName;
-		};
+			const voiceId = member.voice.channel.id;
 
-		const channel = member.voice.channel;
-		const name = getName(member);
+			console.log('memberId: '+memberId);
+			console.log('voiceId: '+voiceId);
 
-		console.log('channel: '+channel);
-		console.log('name: '+name);
+			const channels = message.guild.channels._cache;
+			const voiceChannel = channels.get(voiceId);
+			const members = voiceChannel.members;
+			const names = _.shuffle(getNames(members));
 
-		if (channel === null) {
-			message.channel.send(`${member.user}`+', you are not in a voice channel! Join a voice channel first.');
-			// message.channel.send(''+member.user.username+'#'+member.user.discriminator+', you are not in a voice channel!');
-			return;
-		}
+			console.log('names: '+names.toString());
 
-		const voiceId = member.voice.channel.id;
+			const length = members.size;
+			const indices = _.shuffle(_.range(0, length));
 
-		console.log('memberId: '+memberId);
-		console.log('voiceId: '+voiceId);
-
-		// message.guild.channels.fetch(voiceId).then((voice) => {
-		// 	const userNick = getArrUserNick(voice.members);
-		// 	console.log('--- Current userNick: '+userNick.toString());
-		// })
-		
-		const cache = message.guild.channels._cache;
-		for (let [voiceId, voice] of cache) {
-			const name = voice.name;
-			if (name.toLowerCase().includes('general') && voice.type === 'GUILD_VOICE') {
-				console.log('found the general voice!');
-				console.log('voice.name: '+voice.name+', voice.type: '+voice.type);
-
-				const members = voice.members;
-				const userNick = getArrUserNick(members);
-
-				// let usersNick = [];
-				// for (let [memberId, member] of members) {
-				// 	const nick = member.nickname;
-				// 	const username = member.user.username;
-				// 	if (nick === null) {
-				// 		usersNick.push(username);
-				// 	} else {
-				// 		usersNick.push(nick);
-				// 	}
-				// }
-
-				console.log('- usersNick.length: '+usersNick.length);
-				console.log('- usersNick: '+usersNick);
+			let indicesSplit = null;
+			if (length >= 10) {
+				indicesSplit = _.chunk(indices, 5);
+			} else if (length <= 1) {
+				message.channel.send('In voice channel, there must be at least 2 persons!');
+				return;
+			} else {
+				indicesSplit = _.chunk(indices, Math.floor(length / 2));
 			}
-		}
 
-		console.log('');
+			const membersUser = members.map((k, v) => k)
+
+			const membersTeam1 = indicesSplit[0].map((x) => { return membersUser[x]; });
+			const membersTeam2 = indicesSplit[1].map((x) => { return membersUser[x]; });
+
+			const membersTextTeam1 = membersTeam1.map((member) => { return `${member.user}`; });
+			const membersTextTeam2 = membersTeam2.map((member) => { return `${member.user}`; });
+
+			message.channel.send('Team :one:: '+membersTextTeam1.toString()+'\nvs.\nTeam :two:: '+membersTextTeam2.toString());
+			console.log('');
+			break;
+		default:
+			break
 	}
 }
 
