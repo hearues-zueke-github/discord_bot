@@ -1,6 +1,12 @@
-const Discord = require('discord.js');
-const {Intents} = require("discord.js");
-const _ = require("lodash");
+// const Discord = require('discord.js');
+import Discord from 'discord.js';
+// const {Intents} = require("discord.js");
+import {Intents} from "discord.js";
+// const {token} = require("./config.js");
+import { token } from './config.js';
+import _ from "lodash";
+
+console.log(token);
 
 const client = new Discord.Client({ intents: [
 		Intents.FLAGS.GUILDS,
@@ -37,7 +43,7 @@ function getNames(members) {
 	return names;
 }
 
-messageCreateFunction = function(message) {
+const messageCreateFunction = function(message) {
 	if (!message.content.startsWith(prefix) || message.author.bot) {
 		return;
 	}
@@ -111,6 +117,6 @@ messageCreateFunction = function(message) {
 	}
 }
 
-client.on('messageCreate', messageCreateFunction)
+client.on('messageCreate', messageCreateFunction);
 
-client.login('OTExMjY3Mjg0NjcxMTM1NzQ0.YZe5yw.acdQFQzP3R8jwg9gKOVfDSNQ1yk')
+client.login(token);

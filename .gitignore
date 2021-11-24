@@ -1,2 +1,5 @@
 .idea
 node_modules
+src/config.ts
+/dist/
+assets/logo_5v5.png
