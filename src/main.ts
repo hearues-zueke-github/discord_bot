@@ -3,10 +3,16 @@ import Discord from 'discord.js';
 // const {Intents} = require("discord.js");
 import {Intents} from "discord.js";
 // const {token} = require("./config.js");
-import { token } from './config.js';
+// @ts-ignore
+import { token } from './config';
 import _ from "lodash";
 
-console.log(token);
+import moment from 'moment';
+
+function getDateTime(): string {
+	let _now: moment.Moment = moment(new Date());
+	return _now.format('YYYY.MM.DD HH:mm:ss ZZ');
+}
 
 const client = new Discord.Client({ intents: [
 		Intents.FLAGS.GUILDS,
@@ -48,6 +54,9 @@ const messageCreateFunction = function(message) {
 		return;
 	}
 
+	const strDateTime: string = getDateTime();
+	console.log('\nDateTime: '+strDateTime);
+
 	const member = message.member;
 	const memberId = member.id;
 
@@ -56,6 +65,10 @@ const messageCreateFunction = function(message) {
 
 	const args = message.content.slice(prefix.length).split(/ +/);
 	const command = args.shift().toLowerCase();
+
+	console.log('- member: '+member);
+	console.log('- name: '+name);
+	console.log('- args: '+args);
 
 	switch (command) {
 		case 'help':
@@ -78,15 +91,15 @@ const messageCreateFunction = function(message) {
 
 			const voiceId = member.voice.channel.id;
 
-			console.log('memberId: '+memberId);
-			console.log('voiceId: '+voiceId);
+			console.log('- memberId: '+memberId);
+			console.log('- voiceId: '+voiceId);
 
 			const channels = message.guild.channels._cache;
 			const voiceChannel = channels.get(voiceId);
 			const members = voiceChannel.members;
 			const names = _.shuffle(getNames(members));
 
-			console.log('names: '+names.toString());
+			console.log('- names: '+names.toString());
 
 			const length = members.size;
 			const indices = _.shuffle(_.range(0, length));

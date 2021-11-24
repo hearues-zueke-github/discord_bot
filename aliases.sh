@@ -9,4 +9,4 @@ if [[ ${PATH} != *${PATH2}* ]]; then PATH=$PATH2:$PATH; fi
 
 echo 'SCRIPT_DIR: '${SCRIPT_DIR}
 
-alias start='node .'
+alias start-bot='npm run bot'
