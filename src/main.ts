@@ -72,7 +72,7 @@ const messageCreateFunction = function(message) {
 
 	switch (command) {
 		case 'help':
-			message.channel.send('Available commands: ping, keyboard, 5v5');
+			message.channel.send('Available commands:\n- ping,\n- keyboard,\n- 5v5,\n- spin');
 			break;
 		case'ping':
 			message.channel.send('pong!');
@@ -81,8 +81,8 @@ const messageCreateFunction = function(message) {
 			message.channel.send('Logitech something is my keyboard, yes!');
 			break;
 		case '5v5':
-			console.log('channel: '+channel);
-			console.log('name: '+name);
+			console.log('- channel: '+channel);
+			console.log('- name: '+name);
 
 			if (channel === null) {
 				message.channel.send(`${member.user}`+', you are not in a voice channel! Join a voice channel first.');
@@ -124,6 +124,20 @@ const messageCreateFunction = function(message) {
 
 			message.channel.send('Team :one:: '+membersTextTeam1.toString()+'\nvs.\nTeam :two:: '+membersTextTeam2.toString());
 			console.log('');
+			break;
+		case 'spin':
+			const isCSGOMaps = (args[0] === '-csgo');
+
+			if (isCSGOMaps) {
+				const maps = ['Mirage', 'Dust2', 'Vertigo', 'Overpass', 'Ancient', 'Inferno', 'Nuke'];
+				const randomMap = _.sample(maps);
+				message.channel.send('Available maps: '+maps+'\nChoosen map was: '+randomMap);
+				break;
+			}
+
+			const randomElement = _.sample(args);
+
+			message.channel.send('Elements in array: '+args+'\nChoosen element was: '+randomElement);
 			break;
 		default:
 			break
